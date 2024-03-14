@@ -6,45 +6,39 @@ import java.util.Hashtable;
 public class Parque implements IParque{
 
 
-	// TODO 
 	private int contadorPersonasTotales;
-	private Hashtable<String, Integer> contadoresPersonasPuerta;
-	
-	
-	public Parque() {
-		contadorPersonasTotales = 0;
-		contadoresPersonasPuerta = new Hashtable<String, Integer>();
-	}
+    	private Hashtable<String, Integer> contadoresPersonasPuerta;
+    	private static final int AFORO_MAXIMO = 50;
+
+    	public Parque() {
+        	contadorPersonasTotales = 0;
+        	contadoresPersonasPuerta = new Hashtable<String, Integer>();
+    	}
 
 
 	@Override
-	public void entrarAlParque(String puerta){		// TODO
-		
-		// Si no hay entradas por esa puerta, inicializamos
-		if (contadoresPersonasPuerta.get(puerta) == null){
-			contadoresPersonasPuerta.put(puerta, 0);
-		}
-		
-		// TODO
-				
-		
-		// Aumentamos el contador total y el individual
-		contadorPersonasTotales++;		
-		contadoresPersonasPuerta.put(puerta, contadoresPersonasPuerta.get(puerta)+1);
-		
-		// Imprimimos el estado del parque
-		imprimirInfo(puerta, "Entrada");
-		
-		// TODO
-		
-		
-		// TODO
-		
-	}
+    	public synchronized void entrarAlParque(String puerta) {
+        	comprobarAntesDeEntrar();
+        	if (contadoresPersonasPuerta.get(puerta) == null) {
+            	contadoresPersonasPuerta.put(puerta, 0);
+        	}
+
+        	contadorPersonasTotales++;
+        	contadoresPersonasPuerta.put(puerta, contadoresPersonasPuerta.get(puerta) + 1);
+
+        	imprimirInfo(puerta, "Entrada");
+        	checkInvariante();
+    	}
 	
-	// 
-	// TODO Método salirDelParque
-	//
+	@Override
+    	public synchronized void salirDelParque(String puerta) {
+        	comprobarAntesDeSalir();
+        	contadorPersonasTotales--;
+        	contadoresPersonasPuerta.put(puerta, contadoresPersonasPuerta.get(puerta) - 1);
+
+        	imprimirInfo(puerta, "Salida");
+        	checkInvariante();
+    	}
 	
 	
 	private void imprimirInfo (String puerta, String movimiento){
@@ -68,25 +62,18 @@ public class Parque implements IParque{
 	}
 	
 	protected void checkInvariante() {
-		assert sumarContadoresPuerta() == contadorPersonasTotales : "INV: La suma de contadores de las puertas debe ser igual al valor del contador del parte";
-		// TODO 
-		// TODO
-		
-		
-		
-	}
+        	assert contadorPersonasTotales <= AFORO_MAXIMO : "INV: Se ha superado el aforo máximo del parque";
+        	assert contadorPersonasTotales >= 0 : "INV: El contador total de personas no puede ser negativo";
+        	assert sumarContadoresPuerta() == contadorPersonasTotales : "INV: La suma de contadores de las puertas debe ser igual al valor del contador total";
+    	}
 
-	protected void comprobarAntesDeEntrar(){
-		//
-		// TODO
-		//
-	}
+	protected void comprobarAntesDeEntrar() {
+        	assert contadorPersonasTotales < AFORO_MAXIMO : "El parque está lleno, no se pueden admitir más personas.";
+    	}
 
-	protected void comprobarAntesDeSalir(){
-		//
-		// TODO
-		//
-	}
+	protected void comprobarAntesDeSalir() {
+        	assert contadorPersonasTotales > 0 : "El parque está vacío, no se puede salir.";
+    	}
 
 
 }
